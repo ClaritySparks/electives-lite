@@ -1,9 +1,15 @@
 import os
+from copy import deepcopy
 
 from classes.food import Food
 from classes.job import Job
 from classes.house import House
 from classes.sim import Sim
+
+
+def clear_screen():
+  # Clear screen so give better experience
+  os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def list_sims(sims):
@@ -12,8 +18,7 @@ def list_sims(sims):
   """
   sim_number = 0
   for sim in sims:
-    print(f"#{sim_number}")
-    print(sim, end="\n")
+    print(f"#{sim_number} {sim}", end="\n")
     sim_number += 1 
   
 
@@ -23,8 +28,7 @@ def list_houses(houses):
   """
   house_number = 0
   for house in houses:
-    print(f"#{house_number}")
-    print(house, end="\n")
+    print(f"#{house_number} {house}", end="\n")
     house_number += 1
 
 
@@ -34,8 +38,7 @@ def list_jobs(jobs):
   """
   job_number = 0
   for job in jobs:
-    print(f"#{job_number}")
-    print(job, end="\n")
+    print(f"#{job_number} {job}", end="\n")
     job_number += 1
 
 
@@ -45,25 +48,31 @@ def list_foods(foods):
   """
   food_number = 0
   for food in foods:
-    print(f"#{food_number}")
-    print(food, end="\n")
+    print(f"#{food_number} {food}", end="\n")
     food_number += 1
 
 
 def prompt_from_list(objects):
   """
-  This function is prompt that request user to choose a number.
+  This function is prompting user to choose a number.
   The chosen number should be 0 <= chosen number < length of objects list.
+  If the chosen number is out of objects list index range, it will return None
   """
-  # Choose any object from objects list
-  object_option = int(input("Choose: "))
+  # Initialized selected_object as None
   selected_object = None
 
-  # If the object option is not match with list index, we return None
-  if object_option >= 0 and object_option < len(objects):
-    selected_object = objects[object_option]
-  else:
-    print("Please choose the correct number in list.")
+  # Repeat choose while-loop if the selected_object remained None
+  while selected_object is None:
+    # Choose any object from objects list
+    object_option = int(input("Choose: "))
+
+    # If the object option is not match with list index, we return None
+    if object_option >= 0 and object_option < len(objects):
+      selected_object = objects[object_option]
+    else:
+      # If the selected object is out of list, print error message
+      print("Please choose the correct number in list.")
+
   return selected_object
 
 
@@ -72,18 +81,17 @@ def prompt_new_sim(houses):
   This function is prompt that request use to fill new sim fields.
   The fields including first name, last name, and choose a house.
   """
-  Sim(first_name='Deborah', last_name='Tampubolon', house=apartment, job=programmer)
   first_name = input('First name: ')
   last_name = input('Last name: ')
 
   # Choose house for new sim
   print("------- List Houses -------")
   list_houses(houses)
-  selected_house = None
-  while selected_house is None:
-    selected_house = prompt_from_list(houses)
+  selected_house = prompt_from_list(houses)
+  house = deepcopy(selected_house)
+  house.start_rent()
 
-  new_sim = Sim(first_name=first_name, last_name=last_name, house=selected_house, job=None)
+  new_sim = Sim(first_name=first_name, last_name=last_name, house=house, job=None)
   return new_sim
 
 
@@ -93,9 +101,7 @@ def sim_actions(sim, jobs, foods):
 
   # Loop the menus as long the is_exit_sim variable not changed to True
   while not is_exit_sim and not sim.dead:
-     # Clear screen so give better experience
-    os.system('cls' if os.name == 'nt' else 'clear')
-
+    clear_screen()
     sim_actions_message = f"""Your sim : {sim}
 
 ========== Sim Actions ===========
@@ -136,9 +142,7 @@ Choose your sim action: """
         # Choose food from inventory to eat
         print("------- List Foods -------")
         list_foods(sim.inventory)
-        selected_food = None
-        while selected_food is None:
-          selected_food = prompt_from_list(sim.inventory)
+        selected_food = prompt_from_list(sim.inventory)
         sim.eat(selected_food)
       else:
         _ = input("You don't have any foods. Please cook first. Enter to continue")
@@ -147,18 +151,14 @@ Choose your sim action: """
       # Choose food from known foods list
       print("------- List Foods -------")
       list_foods(foods)
-      selected_food = None
-      while selected_food is None:
-        selected_food = prompt_from_list(foods)
+      selected_food = prompt_from_list(foods)
       sim.cook(selected_food)
     
     elif sim_action_option == 7:
       # Choose new job
       print("-------- List Jobs --------")
       list_jobs(jobs)
-      selected_job = None
-      while selected_job is None:
-        selected_job = prompt_from_list(jobs)
+      selected_job = prompt_from_list(jobs)
       
       # Set the selected job to sim
       sim.new_job(selected_job)
@@ -172,8 +172,7 @@ Choose your sim action: """
         print("There is no due for house rent.")
       else:
         total_week = int(input("How long are you going to pay the rent? (weeks) "))
-        sim.work(total_week)
-        sim.pay_rent(1)
+        sim.pay_rent(total_week)
     
     else:
       # If the user input is not in the menu
@@ -182,9 +181,9 @@ Choose your sim action: """
   if sim.dead:
     print("Your sim is dead.")
   else:
-    reset_input = input("Do you want to reset this sim condition? (y/n) ")
+    reset_input = input("Do you want to reset this sim body condition? (y/n) ")
     if reset_input.lower() == "y":
-      sim.reset()
+      sim.reset_body_status()
 
 
 def menu(sims, houses, jobs, foods):
@@ -192,6 +191,7 @@ def menu(sims, houses, jobs, foods):
 
   # Loop the menus as long the is_exit variable not changed to True
   while not is_exit:
+    # Don't mind following variable. In python, we can put a multiline string like this
     menu_message = """
 ========== Menus ===========
 0. Quit game
@@ -204,8 +204,7 @@ Choose your menu: """
     # Typecasting input from string to integer
     menu_option = int(input(menu_message))
 
-    # Clear screen so give better experience
-    os.system('cls' if os.name == 'nt' else 'clear')
+    clear_screen()
 
     # Control flow when select some menus
     if menu_option == 0:
@@ -224,9 +223,7 @@ Choose your menu: """
     elif menu_option == 3:
       print("------- Select Sims -------")
       list_sims(sims)
-      selected_sim = None
-      while selected_sim is None:
-        selected_sim = prompt_from_list(sims)
+      selected_sim = prompt_from_list(sims)
       sim_actions(selected_sim, jobs, foods)
     
     else:
@@ -244,8 +241,10 @@ if __name__ == "__main__":
   # Foods declarations
   pizza = Food(name='Pizza', description='Italiano food', price=70, energy=50)
   burger = Food(name='Burger', description='American food', price=30, energy=30)
-  nasi_padang = Food(name='Nasi Padang', description='Indonesian food', price=10, energy=100)
-  foods = [pizza, burger, nasi_padang]
+  nasi_padang = Food(name='Nasi Padang', description='Indonesian food', price=20, energy=70)
+  salad = Food(name='Salad', description='Healthy food', price=20, energy=50)
+  soto = Food(name='Soto', description='Indonesian food', price=30, energy=60)
+  foods = [pizza, burger, nasi_padang, salad, soto]
 
   # Houses declarations
   andara = House(name='Andara', description='Rumah sultan', area=50, rent_per_week=300)
@@ -253,7 +252,6 @@ if __name__ == "__main__":
   houses = [andara, apartment]
 
   # Sims declaration
-  deborah = Sim(first_name='Deborah', last_name='Tampubolon', house=apartment, job=programmer)
   deborah = Sim(first_name='Deborah', last_name='Tampubolon', house=apartment, job=programmer)
   sims = [deborah]
 

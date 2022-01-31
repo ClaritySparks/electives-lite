@@ -13,11 +13,17 @@ class Job:
   def max_hours(self):
     return self.__max_hours
 
-  def calculate_salary(self, total_hour: int) -> float:
-    if total_hour >= self.__max_hours:
+  def calculate_salary(self, work_duration: int) -> float:
+    """
+    This function return calculated salary based on work duration.
+    Due to maintaining work life balance, we avoid overtime, so there won't be overtime benefit.
+    If the work duration exceed max work duration, it will return the max pay based on max work duration.
+
+    """
+    if work_duration >= self.__max_hours:
       return self.__max_hours * self.__pay_per_hour
     else:
-      return total_hour * self.__pay_per_hour
+      return work_duration * self.__pay_per_hour
 
   """
   We can also override the default function __str__() from class
