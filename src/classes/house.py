@@ -9,12 +9,9 @@ class House:
   def rent_per_week(self):
     return self.__rent_per_week
 
-  def info(self):
-    print(f"House {self.__name} | {self.__area} m2 | {self.__description} | Rent per week ${self.__rent_per_week}")
-
   """
   We can also override the default function __str__() from class
   Ref: https://realpython.com/lessons/how-and-when-use-str/
   """
   def __str__(self):
-    return f"House {self.__name} | {self.__area} m2 | {self.__description} | Rent per week ${self.__rent_per_week}"
+    return f"House {self.__name} | {self.__description} | {self.__area} m2 | Rent per week ${self.__rent_per_week}"

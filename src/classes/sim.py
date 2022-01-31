@@ -45,7 +45,7 @@ class Sim:
   
   def cook(self, food: Food):
     if self.__simoleons < food.price:
-      print('You cannot afford {food}')
+      print('Sim cannot afford {food}')
     else:
       self.__simoleons -= food.price
       self.__inventory.append(food)
@@ -68,14 +68,21 @@ class Sim:
   def pay_rent(self, total_week: int):
     total_rent = self.__house.rent_per_week * total_week
     if self.__simoleons < total_rent:
-      print('You cannot pay rent')
+      print('Sim cannot pay rent')
     else:
       self.__simoleons -= total_rent 
   
   """
-  We can also override the default function __str__() from class
+  We can also overr3ide the default function __str__() from class
   Ref: https://realpython.com/lessons/how-and-when-use-str/
   """
   def __str__(self):
     dead_status = "⚱️" if self.__dead else "😊"
-    return f"Sim {self.__first_name} {self.__last_name} {dead_status} \nTotal simoleons ${self.__simoleons}\nEnergy {self.__energy}% | Hunger {self.__hunger}% | Bladder {self.__bladder}% | Hygiene {self.__hygiene}% \nHouse: {self.__house}\nJob: {self.__job}\nInventory: {self.__inventory}"
+    return f"""Sim {self.__first_name} {self.__last_name} {dead_status}
+--------------------------------------------------------------------------------------------------------
+Total simoleons ${self.__simoleons}
+Energy {self.__energy}% | Hunger {self.__hunger}% | Bladder {self.__bladder}% | Hygiene {self.__hygiene}% 
+House: {self.__house}
+Job: {self.__job}
+Inventory: {self.__inventory}
+--------------------------------------------------------------------------------------------------------"""

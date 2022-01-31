@@ -17,9 +17,6 @@ class Food:
   def price(self):
     return self.__price
 
-  def info(self):
-    print(f"Food {self.__name} | {self.__description} | ${self.__price}")
-
   """
   We can also override the default function __str__() from class
   Ref: https://realpython.com/lessons/how-and-when-use-str/
