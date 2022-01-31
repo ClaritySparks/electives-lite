@@ -71,14 +71,15 @@ class Sim:
   def eat(self, food: Food):
     """
     This function performs sim doing eat actions which include:
-    1. Regulate the body first, so the refilled result is not affected by the regulate
-    2. Check if the selected food is in the inventory
+    1. Check if the selected food is in the inventory
     3. If the selected food is not in inventory, print error message
-    4. If the selected food is in inventory, increase the hunger according to food energy.
-       If the hunger reach more than MAX_POINT, it will be reset to MAX_POINT
+    4. If the selected food is in inventory,
+       a. Regulate the body first, so the refilled result is not affected by the regulate
+       b. Increase the hunger according to food energy.
+       c. If the hunger reach more than MAX_POINT, it will be reset to MAX_POINT
     """
-    self.__regulate_body()
     if food in self.__inventory:
+      self.__regulate_body()
       self.__hunger += food.energy
       if self.__hunger > MAX_POINT:
         self.__hunger = MAX_POINT
