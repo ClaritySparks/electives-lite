@@ -1,5 +1,4 @@
 import os
-from typing import List
 
 from classes.food import Food
 from classes.job import Job
@@ -51,7 +50,28 @@ def list_foods(foods):
     food_number += 1
 
 
-def prompt_new_sim(houses, jobs):
+def prompt_from_list(objects):
+  """
+  This function is prompt that request user to choose a number.
+  The chosen number should be 0 <= chosen number < length of objects list.
+  """
+  # Choose any object from objects list
+  object_option = int(input("Choose: "))
+  selected_object = None
+
+  # If the object option is not match with list index, we return None
+  if object_option >= 0 and object_option < len(objects):
+    selected_object = objects[object_option]
+  else:
+    print("Please choose the correct number in list.")
+  return selected_object
+
+
+def prompt_new_sim(houses):
+  """
+  This function is prompt that request use to fill new sim fields.
+  The fields including first name, last name, and choose a house.
+  """
   Sim(first_name='Deborah', last_name='Tampubolon', house=apartment, job=programmer)
   first_name = input('First name: ')
   last_name = input('Last name: ')
@@ -59,37 +79,105 @@ def prompt_new_sim(houses, jobs):
   # Choose house for new sim
   print("------- List Houses -------")
   list_houses(houses)
-  house_option = int(input("Choose your house: "))
-  if house_option >= 0 and house_option < len(houses):
-    selected_house = houses[house_option]
-  else:
-    print("Please choose the correct number in list houses.")
-  
-  # Choose job for new sim
-  print("-------- List Jobs --------")
-  list_jobs(jobs)
-  job_option = int(input("Choose your job: "))
-  if job_option >= 0 and job_option < len(jobs):
-    selected_job = jobs[job_option]
-  else:
-    print("Please choose the correct number in list jobs.")
+  selected_house = None
+  while selected_house is None:
+    selected_house = prompt_from_list(houses)
 
-  new_sim = Sim(first_name=first_name, last_name=last_name, house=selected_house, job=selected_job)
+  new_sim = Sim(first_name=first_name, last_name=last_name, house=selected_house, job=None)
   return new_sim
 
 
-def menu(houses, jobs, foods, sims):
-  is_exit = False
+def sim_actions(sim, jobs, foods):
+  is_exit_sim = False
   selected_sim = None
+
+  # Loop the menus as long the is_exit_sim variable not changed to True
+  while not is_exit_sim:
+    sim_actions_message = f"""
+Your sim : {sim}
+
+========== Sim Actions ===========
+0. Exit to main menu
+1. Drink
+2. Shower
+3. Use toilet
+4. Sleep
+5. Eat
+6. Cook
+7. Find job
+8. Work
+
+Choose your sim action: """
+    # Typecasting input from string to integer
+    sim_action_option = int(input(sim_actions_message))
+
+    # Clear screen so give better experience
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+    # Control flow when select some menus
+    if sim_action_option == 0:
+      is_exit_sim = True
+
+    elif sim_action_option == 1:
+      sim.drink()
+
+    elif sim_action_option == 2:
+      sim.shower()
+    
+    elif sim_action_option == 3:
+      sim.use_toilet()
+    
+    elif sim_action_option == 4:
+      sim.sleep()
+    
+    elif sim_action_option == 5:
+      # Choose food from inventory to eat
+      print("------- List Foods -------")
+      list_foods(sim.inventory)
+      selected_food = None
+      while selected_food is None:
+        selected_food = prompt_from_list(sim.inventory)
+      sim.eat(selected_food)
+    
+    elif sim_action_option == 6:
+      # Choose food from known foods list
+      print("------- List Foods -------")
+      list_foods(foods)
+      selected_food = None
+      while selected_food is None:
+        selected_food = prompt_from_list(foods)
+      sim.cook(selected_food)
+    
+    elif sim_action_option == 7:
+      # Choose new job
+      print("-------- List Jobs --------")
+      list_jobs(jobs)
+      selected_job = None
+      while selected_job is None:
+        selected_job = prompt_from_list(jobs)
+      
+      # Set the selected job to sim
+      sim.new_job(selected_job)
+    
+    elif sim_action_option == 8:
+      pass
+    
+    else:
+      # If the user input is not in the menu
+      print("Sorry we didn't understand you. Please choose the correct number in menus.")
+
+
+def menu(sims, houses, jobs, foods):
+  is_exit = False
 
   # Loop the menus as long the is_exit variable not changed to True
   while not is_exit:
     menu_message = """
 ========== Menus ===========
-0. New sim
-1. List sims
-2. Select sims
-3. Exit
+0. Quit game
+1. New sim
+2. List sims
+3. Select sims
 
 Choose your menu: """
 
@@ -101,26 +189,25 @@ Choose your menu: """
 
     # Control flow when select some menus
     if menu_option == 0:
-      print("--------- New Sim ---------")
-      new_sim = prompt_new_sim(houses, jobs)
-      sims.append(new_sim)
+      # Changed the is_exit variable so it will exit the while loop
+      is_exit = True
 
     elif menu_option == 1:
+      print("--------- New Sim ---------")
+      new_sim = prompt_new_sim(houses)
+      sims.append(new_sim)
+
+    elif menu_option == 2:
       print("-------- List Sims --------")
       list_sims(sims)
     
-    elif menu_option == 2:
+    elif menu_option == 3:
       print("------- Select Sims -------")
       list_sims(sims)
-      sim_option = int(input("Choose your sim: "))
-      if sim_option >= 0 and sim_option < len(sims):
-        selected_sim = sims[sim_option]
-      else:
-        print("Please choose the correct number in list sims.")
-    
-    elif menu_option == 3:
-      # Changed the is_exit variable so it will exit the while loop
-      is_exit = True
+      selected_sim = None
+      while selected_sim is None:
+        selected_sim = prompt_from_list(sims)
+      sim_actions(selected_sim, jobs, foods)
     
     else:
       # If the user input is not in the menu
@@ -128,17 +215,17 @@ Choose your menu: """
 
 
 if __name__ == "__main__":
-  # Following codes is declarations of things we'll be using in the menu
+  # Following codes is declarations of things we'll be using in the sim actions
+  # Jobs declarations
+  programmer = Job(name='Programmer', description='Do magic with codes', pay_per_hour=20.5, max_hours=10)
+  designer = Job(name='Designer', description='Love to prettify things', pay_per_hour=20.5, max_hours=8)
+  jobs = [programmer, designer]
+
   # Foods declarations
   pizza = Food(name='Pizza', description='Italiano food', price='200', energy=50)
   burger = Food(name='Burger', description='American food', price='50', energy=30)
   nasi_padang = Food(name='Nasi Padang', description='Indonesian food', price='10', energy=100)
   foods = [pizza, burger, nasi_padang]
-
-  # Jobs declarations
-  programmer = Job(name='Programmer', description='Do magic with codes', pay_per_hour=20.5, max_hours=10)
-  designer = Job(name='Designer', description='Love to prettify things', pay_per_hour=20.5, max_hours=8)
-  jobs = [programmer, designer]
 
   # Houses declarations
   andara = House(name='Andara', description='Rumah sultan', area=50, rent_per_week=30)
@@ -153,7 +240,7 @@ if __name__ == "__main__":
   print("Welcome to SimsLite!")
   _ = input("Press enter to continue")
 
-  # Passing the declared houses, jobs, foods, and sims to the procedure menu
-  menu(houses, jobs, foods, sims)
+  # Passing the declared sims, houses, jobs, and foods to the procedure menu
+  menu(sims, houses, jobs, foods)
 
   print("Glad to play with you, bye!")

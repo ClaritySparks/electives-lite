@@ -42,6 +42,8 @@ class Sim:
       if self.__hunger > FULL_POINT:
         self.__hunger = FULL_POINT
       self.__inventory.remove(food)
+    else:
+      print('Sim doesn\'t have the food in inventory. Please cook first.')
   
   def cook(self, food: Food):
     if self.__simoleons < food.price:
@@ -56,7 +58,7 @@ class Sim:
   def sleep(self):
     self.__energy = FULL_POINT
 
-  def use_a_toilet(self):
+  def use_toilet(self):
     self.__bladder = FULL_POINT
   
   def work(self, total_hour: int):
