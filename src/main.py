@@ -92,9 +92,11 @@ def sim_actions(sim, jobs, foods):
   selected_sim = None
 
   # Loop the menus as long the is_exit_sim variable not changed to True
-  while not is_exit_sim:
-    sim_actions_message = f"""
-Your sim : {sim}
+  while not is_exit_sim and not sim.dead:
+     # Clear screen so give better experience
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+    sim_actions_message = f"""Your sim : {sim}
 
 ========== Sim Actions ===========
 0. Exit to main menu
@@ -106,13 +108,11 @@ Your sim : {sim}
 6. Cook
 7. Find job
 8. Work
+9. Pay rent
 
 Choose your sim action: """
     # Typecasting input from string to integer
     sim_action_option = int(input(sim_actions_message))
-
-    # Clear screen so give better experience
-    os.system('cls' if os.name == 'nt' else 'clear')
 
     # Control flow when select some menus
     if sim_action_option == 0:
@@ -128,16 +128,20 @@ Choose your sim action: """
       sim.use_toilet()
     
     elif sim_action_option == 4:
-      sim.sleep()
+      total_hour = int(input("How long are you going to sleep? (hrs) "))
+      sim.sleep(total_hour)
     
     elif sim_action_option == 5:
-      # Choose food from inventory to eat
-      print("------- List Foods -------")
-      list_foods(sim.inventory)
-      selected_food = None
-      while selected_food is None:
-        selected_food = prompt_from_list(sim.inventory)
-      sim.eat(selected_food)
+      if len(sim.inventory) > 0:
+        # Choose food from inventory to eat
+        print("------- List Foods -------")
+        list_foods(sim.inventory)
+        selected_food = None
+        while selected_food is None:
+          selected_food = prompt_from_list(sim.inventory)
+        sim.eat(selected_food)
+      else:
+        _ = input("You don't have any foods. Please cook first. Enter to continue")
     
     elif sim_action_option == 6:
       # Choose food from known foods list
@@ -160,11 +164,27 @@ Choose your sim action: """
       sim.new_job(selected_job)
     
     elif sim_action_option == 8:
-      pass
+      total_hour = int(input("How long are you going to work? (hrs) Notes: We're not allowing overtime, if so you'll be paid to the max working hours. "))
+      sim.work(total_hour)
+    
+    elif sim_action_option == 9:
+      if not sim.house.is_due():
+        print("There is no due for house rent.")
+      else:
+        total_week = int(input("How long are you going to pay the rent? (weeks) "))
+        sim.work(total_week)
+        sim.pay_rent(1)
     
     else:
       # If the user input is not in the menu
       print("Sorry we didn't understand you. Please choose the correct number in menus.")
+    
+  if sim.dead:
+    print("Your sim is dead.")
+  else:
+    reset_input = input("Do you want to reset this sim condition? (y/n) ")
+    if reset_input.lower() == "y":
+      sim.reset()
 
 
 def menu(sims, houses, jobs, foods):
@@ -222,14 +242,14 @@ if __name__ == "__main__":
   jobs = [programmer, designer]
 
   # Foods declarations
-  pizza = Food(name='Pizza', description='Italiano food', price='200', energy=50)
-  burger = Food(name='Burger', description='American food', price='50', energy=30)
-  nasi_padang = Food(name='Nasi Padang', description='Indonesian food', price='10', energy=100)
+  pizza = Food(name='Pizza', description='Italiano food', price=70, energy=50)
+  burger = Food(name='Burger', description='American food', price=30, energy=30)
+  nasi_padang = Food(name='Nasi Padang', description='Indonesian food', price=10, energy=100)
   foods = [pizza, burger, nasi_padang]
 
   # Houses declarations
-  andara = House(name='Andara', description='Rumah sultan', area=50, rent_per_week=30)
-  apartment = House(name='Apartment', description='Future way of living', area=25, rent_per_week=10)
+  andara = House(name='Andara', description='Rumah sultan', area=50, rent_per_week=300)
+  apartment = House(name='Apartment', description='Future way of living', area=25, rent_per_week=100)
   houses = [andara, apartment]
 
   # Sims declaration

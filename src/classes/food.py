@@ -22,7 +22,7 @@ class Food:
   Ref: https://realpython.com/lessons/how-and-when-use-str/
   """
   def __str__(self):
-    return f"Food {self.__name} | {self.__description} | ${self.__price}"
+    return f"Food {self.__name} | {self.__description} | ${self.__price} | {self.__energy} hunger points"
 
 
   """

@@ -4,10 +4,22 @@ class House:
     self.__description = description
     self.__area = area
     self.__rent_per_week = rent_per_week
+    self.__time_in_days = 0
 
   @property
   def rent_per_week(self):
     return self.__rent_per_week
+
+  def is_due(self):
+    return self.__time_in_days >= 3
+
+  def receieve_rent(self, total_week):
+    self.__time_in_days -= total_week * 3
+    if self.__time_in_days < 0:
+      self.__time_in_days = 0
+    
+  def check_in_rent(self):
+    self.__time_in_days += 1
 
   """
   We can also override the default function __str__() from class
